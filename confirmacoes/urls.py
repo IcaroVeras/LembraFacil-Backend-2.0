@@ -7,9 +7,9 @@ from .views import ConfirmacaoDoseViewSet
 router = DefaultRouter()
 
 router.register(
-    r'confirmacoes',
+    r'registros',
     ConfirmacaoDoseViewSet,
-    basename='confirmacao'
+    basename='registro'
 )
 
 urlpatterns = [

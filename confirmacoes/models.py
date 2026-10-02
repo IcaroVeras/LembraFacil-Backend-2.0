@@ -9,6 +9,7 @@ class ConfirmacaoDose(models.Model):
     STATUS_CHOICES = [
         ('pendente', 'Pendente'),
         ('tomado', 'Tomado'),
+        ('atrasado', 'Atrasado'),
         ('nao_tomado', 'Não tomado'),
     ]
 
@@ -27,7 +28,14 @@ class ConfirmacaoDose(models.Model):
     horario = models.ForeignKey(
         HorarioMedicamento,
         on_delete=models.CASCADE,
-        related_name='confirmacoes'
+        related_name='confirmacoes',
+        null=True,
+        blank=True
+    )
+
+    horario_previsto = models.TimeField(
+        null=True,
+        blank=True
     )
 
     data = models.DateField()
@@ -44,13 +52,14 @@ class ConfirmacaoDose(models.Model):
     )
 
     criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-data', 'horario']
+        ordering = ['-data', 'horario_previsto']
         constraints = [
             models.UniqueConstraint(
-                fields=['usuario', 'medicamento', 'horario', 'data'],
-                name='dose_unica_por_horario_data'
+                fields=['usuario', 'medicamento', 'horario_previsto', 'data'],
+                name='dose_unica_por_medicamento_data'
             )
         ]
 

@@ -12,6 +12,8 @@ class MedicamentoSerializer(serializers.ModelSerializer):
             'dose',
             'horario',
             'frequencia',
+            'quantidade',
+            'duracao',
             'observacao',
             'ativo',
             'criado_em',

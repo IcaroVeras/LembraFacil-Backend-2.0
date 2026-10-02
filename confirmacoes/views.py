@@ -1,3 +1,4 @@
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -17,29 +18,65 @@ class ConfirmacaoDoseViewSet(viewsets.ModelViewSet):
         ).select_related(
             'medicamento',
             'horario'
-        ).order_by('-data', 'horario__horario')
+        ).order_by('-data', 'horario_previsto')
 
-    def perform_create(self, serializer):
-        medicamento = serializer.validated_data['medicamento']
-        horario = serializer.validated_data['horario']
-        status = serializer.validated_data.get('status', 'pendente')
-
+    def _validar_vinculos(self, medicamento, horario):
         if medicamento.usuario != self.request.user:
             raise PermissionDenied(
                 'Este medicamento não pertence ao usuário.'
             )
 
-        if horario.medicamento_id != medicamento.id:
+        if horario is not None and horario.medicamento_id != medicamento.id:
             raise ValidationError(
                 'Este horário não pertence ao medicamento informado.'
             )
 
-        confirmado_em = None
+    def perform_create(self, serializer):
+        medicamento = serializer.validated_data['medicamento']
+        horario = serializer.validated_data.get('horario')
+
+        self._validar_vinculos(medicamento, horario)
+
+        extras = {'usuario': self.request.user}
+
+        # Se o app não mandou o horário previsto, usa o do medicamento
+        if not serializer.validated_data.get('horario_previsto'):
+            extras['horario_previsto'] = (
+                horario.horario if horario else medicamento.horario
+            )
+
+        status = serializer.validated_data.get('status', 'pendente')
 
         if status == 'tomado':
-            confirmado_em = timezone.now()
+            extras['confirmado_em'] = timezone.now()
 
-        serializer.save(
-            usuario=self.request.user,
-            confirmado_em=confirmado_em
+        try:
+            with transaction.atomic():
+                serializer.save(**extras)
+        except IntegrityError:
+            raise ValidationError(
+                'Já existe um registro deste medicamento neste horário e data.'
+            )
+
+    def perform_update(self, serializer):
+        instancia = serializer.instance
+
+        medicamento = serializer.validated_data.get(
+            'medicamento', instancia.medicamento
         )
+        horario = serializer.validated_data.get(
+            'horario', instancia.horario
+        )
+
+        self._validar_vinculos(medicamento, horario)
+
+        status = serializer.validated_data.get('status', instancia.status)
+
+        extras = {}
+
+        if status == 'tomado' and instancia.confirmado_em is None:
+            extras['confirmado_em'] = timezone.now()
+        elif status != 'tomado':
+            extras['confirmado_em'] = None
+
+        serializer.save(**extras)

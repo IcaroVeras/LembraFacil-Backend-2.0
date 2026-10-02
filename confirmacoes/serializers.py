@@ -8,8 +8,8 @@ class ConfirmacaoDoseSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
-    horario_dose = serializers.TimeField(
-        source='horario.horario',
+    medicamento_dose = serializers.CharField(
+        source='medicamento.dose',
         read_only=True
     )
 
@@ -19,16 +19,19 @@ class ConfirmacaoDoseSerializer(serializers.ModelSerializer):
             'id',
             'medicamento',
             'medicamento_nome',
+            'medicamento_dose',
             'horario',
-            'horario_dose',
             'data',
+            'horario_previsto',
             'status',
             'confirmado_em',
             'criado_em',
+            'atualizado_em',
         ]
 
         read_only_fields = [
             'id',
             'confirmado_em',
             'criado_em',
+            'atualizado_em',
         ]
