@@ -1,78 +1,115 @@
-💊 LembraFácil — Backend
+# 💊 LembraFácil — Backend
 
-Backend do projeto LembraFácil, responsável pelo gerenciamento dos usuários, medicamentos, horários, pacientes, cuidadores e registros de medicação.
+Backend do projeto LembraFácil, responsável pelo gerenciamento de usuários,
+medicamentos, horários, pacientes, cuidadores e registros de medicação.
 
-🚀 Funcionalidades
+## 🚀 Funcionalidades
 
-- Autenticação de usuários
-- Autenticação utilizando JWT
-- Cadastro de medicamentos
-- Consulta de medicamentos
-- Atualização de medicamentos
-- Exclusão de medicamentos
-- Controle dos horários
-- Registro de medicamentos tomados
-- Identificação de doses em atraso
-- Gerenciamento de pacientes
-- Gerenciamento de cuidadores
-- Vinculação entre cuidador e paciente
+* Cadastro e autenticação de usuários com JWT
+* Cadastro, consulta, atualização e exclusão de medicamentos
+* Cadastro de horários dos medicamentos
+* Registro de medicamentos tomados
+* Gerenciamento de pacientes
+* Gerenciamento de cuidadores
+* Vinculação entre cuidador e paciente
+* Identificação de doses em atraso (em desenvolvimento)
 
-🛠️ Tecnologias utilizadas
+## 🛠️ Tecnologias utilizadas
 
-- Python
-- Django
-- Django REST Framework
-- Simple JWT
-- MySQL
-- Django CORS Headers
+* Python
+* Django
+* Django REST Framework
+* djangorestframework-simplejwt (JWT)
+* SQLite
+* django-cors-headers
 
-🔐 Autenticação
+## ▶️ Como rodar
+
+```bash
+git clone https://github.com/IcaroVeras/LembraFacil-Backend-2.0.git
+cd LembraFacil-Backend-2.0
+
+python -m venv venv
+venv\Scripts\activate
+
+pip install -r requirements.txt
+
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 0.0.0.0:8000
+```
+
+O banco `db.sqlite3` é criado automaticamente no `migrate`. Ele não é versionado,
+então cada pessoa começa com um banco vazio.
+
+Para testar pelo celular, os dois aparelhos precisam estar no mesmo Wi-Fi, e o IP
+do computador deve estar em `ALLOWED_HOSTS` no `config/settings.py`.
+
+## 🔐 Autenticação
 
 A API utiliza autenticação JWT.
 
-Principais rotas:
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/usuarios/cadastro/` | Cria uma conta |
+| POST | `/api/token/` | Login (devolve os tokens access e refresh) |
+| POST | `/api/token/refresh/` | Renova o token de acesso |
 
-"/api/token/"
+As demais rotas exigem o header `Authorization: Bearer <access_token>`.
 
-Utilizada para realizar login e obter os tokens de acesso.
+## 💊 Medicamentos
 
-"/api/token/refresh/"
+A API permite cadastrar e gerenciar:
 
-Utilizada para renovar o token de acesso.
+* Nome do medicamento
+* Dose
+* Quantidade
+* Horário
+* Frequência
+* Duração
+* Observação
+* Status do medicamento
 
-💊 Medicamentos
+Cada medicamento é associado ao usuário autenticado, e cada usuário só enxerga
+os próprios medicamentos.
 
-A API permite cadastrar e gerenciar informações como:
+| Método | Rota | Descrição |
+|---|---|---|
+| GET, POST | `/api/medicamentos/` | Lista e cadastra |
+| GET, PATCH, DELETE | `/api/medicamentos/<id>/` | Detalhe, edição e exclusão |
 
-- Nome do medicamento
-- Dose
-- Quantidade
-- Horário
-- Frequência
-- Duração
-- Observação
-- Status do medicamento
+## ⏰ Registros de dose
 
-Cada medicamento é associado ao usuário autenticado.
+O sistema registra se cada dose foi tomada ou não.
 
-⏰ Controle de horários
+| Método | Rota | Descrição |
+|---|---|---|
+| GET, POST | `/api/registros/` | Lista e cria registros |
+| PATCH | `/api/registros/<id>/` | Confirma a dose como tomada |
 
-O sistema registra os horários dos medicamentos e permite acompanhar a rotina de medicação.
+Está prevista uma rotina para identificar doses não confirmadas no horário esperado.
 
-Também possui uma rotina para verificar doses que não foram confirmadas no horário esperado.
+## 👨‍👩‍👧 Pacientes e cuidadores
 
-👨‍👩‍👧 Pacientes e cuidadores
+O backend possui estrutura para gerenciar pacientes e cuidadores, permitindo criar
+vínculos para acompanhar a rotina de medicamentos.
 
-O backend possui estrutura para gerenciamento de pacientes e cuidadores, permitindo criar vínculos para acompanhamento da rotina de medicamentos.
+## 📲 Notificações
 
-📲 Notificações
+Está prevista a integração de notificações automáticas para avisar o familiar ou
+cuidador quando uma dose não for confirmada dentro do horário esperado.
 
-Está prevista a integração de notificações automáticas para avisar o familiar/cuidador quando uma dose não for confirmada dentro do horário esperado.
+## 📱 Aplicativo
 
-🎯 Objetivo
+O frontend (React Native com Expo) está em:
+https://github.com/IcaroVeras/LembraFacil-Frontend-2.0
 
-Fornecer a estrutura de backend necessária para que o aplicativo LembraFácil possa controlar medicamentos, horários e acompanhamento da rotina de medicação de forma organizada e segura.
+## 🎯 Objetivo
 
-🚧 Status
+Fornecer a estrutura de backend necessária para que o aplicativo LembraFácil possa
+controlar medicamentos, horários e o acompanhamento da rotina de medicação de forma
+organizada e segura.
+
+## 🚧 Status
 
 Projeto em desenvolvimento.
